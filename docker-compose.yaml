@@ -1,0 +1,49 @@
+name: pki
+
+services:
+  minikube:
+    build:
+      context: .
+      dockerfile: Dockerfile.minikube
+    container_name: minikube
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8443"]
+      interval: 60s
+      start_interval: 1m
+      start_period: 2m
+      retries: 3
+      timeout: 30s
+    command: >
+      minikube start
+        --driver=docker
+        --host=0.0.0.0
+        --listen-address=0.0.0.0
+    volumes:
+      - minikube_data:/home/docker/.minikube
+      - kubeconfig:/home/minikube/.kube
+    ports:
+      - 8443:8443
+    networks:
+      - infra
+
+  provisioner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: provisioner
+    restart: no
+    depends_on:
+      - minikube
+    volumes:
+      - kubeconfig:/home/terraform/.kube
+    networks:
+      - infra
+
+volumes:
+  minikube_data:
+  kubeconfig:
+
+networks:
+  infra:
+    driver: bridge
