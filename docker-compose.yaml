@@ -2,9 +2,7 @@ name: pki
 
 services:
   minikube:
-    build:
-      context: .
-      dockerfile: Dockerfile.minikube
+    image: ghcr.io/gridness/minikube:v1.37.0
     container_name: minikube
     restart: on-failure
     healthcheck:
@@ -14,11 +12,6 @@ services:
       start_period: 2m
       retries: 3
       timeout: 30s
-    command: >
-      minikube start
-        --driver=docker
-        --host=0.0.0.0
-        --listen-address=0.0.0.0
     volumes:
       - minikube_data:/home/docker/.minikube
       - kubeconfig:/home/minikube/.kube
