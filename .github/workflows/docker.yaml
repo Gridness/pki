@@ -1,0 +1,84 @@
+name: docker
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build minikube image
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.current_version.outputs.version }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v5.0.0
+
+      - name: obtain current version
+        id: current_version
+        shell: bash
+        run: |
+          echo "version=$(cat .version)" >> $GITHUB_OUTPUT
+
+      - name: extract docker image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/minikube
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.current_version.outputs.version }},enable={{is_default_branch}}
+
+      - name: show metadata
+        run: |
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Labels: ${{ steps.meta.outputs.labels }}"
+
+      - name: login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build and push docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: |
+            VERSION=${{ steps.current_version.outputs.version }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+  release:
+    name: publish new version release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v5.0.0
+
+      - name: publish new release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ needs.build.outputs.latest_version }}" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="${{ needs.build.outputs.latest_version }}" \
+            --generate-notes
