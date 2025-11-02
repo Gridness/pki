@@ -21,9 +21,7 @@ services:
       - infra
 
   provisioner:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/gridness/pki-provisioner:v1.0
     container_name: provisioner
     restart: no
     depends_on:
