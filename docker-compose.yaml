@@ -24,8 +24,16 @@ services:
     image: ghcr.io/gridness/pki-provisioner:v1.0
     container_name: provisioner
     restart: no
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep docker-entrypoint.sh"]
+      interval: 60s
+      start_interval: 5s
+      start_period: 5s
+      retries: 3
+      timeout: 10s
     depends_on:
-      - minikube
+      minikube:
+        condition: service_healthy
     volumes:
       - kubeconfig:/home/terraform/.kube
     networks:
