@@ -1,0 +1,50 @@
+name: pki
+
+services:
+  minikube:
+    image: ghcr.io/gridness/minikube:v1.37.0
+    container_name: minikube
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8443"]
+      interval: 60s
+      start_interval: 1m
+      start_period: 2m
+      retries: 3
+      timeout: 30s
+    volumes:
+      - minikube_data:/home/docker/.minikube
+      - kubeconfig:/home/minikube/.kube
+    ports:
+      - 8443:8443
+    networks:
+      - infra
+
+  provisioner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: provisioner
+    restart: no
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep docker-entrypoint.sh"]
+      interval: 60s
+      start_interval: 5s
+      start_period: 5s
+      retries: 3
+      timeout: 10s
+    depends_on:
+      minikube:
+        condition: service_healthy
+    volumes:
+      - kubeconfig:/home/terraform/.kube
+    networks:
+      - infra
+
+volumes:
+  minikube_data:
+  kubeconfig:
+
+networks:
+  infra:
+    driver: bridge
