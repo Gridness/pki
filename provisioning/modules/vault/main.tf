@@ -1,3 +1,23 @@
+resource "helm_release" "vault" {
+  name = "vault"
+  repository = "https://helm.releases.hashicorp.com"
+  chart = "vault"
+  namespace = vars.vault_namespace
+  create_namespace = true
+  wait = true
+  max_history = 5
+
+  set {
+    name = "server.ha.enabled"
+    value = "false"
+  }
+
+  set {
+    name  = "server.ha.raft.enabled"
+    value = "false"
+  }
+}
+
 resource "vault_mount" "pki" {
   path                      = "pki"
   type                      = "pki"
@@ -66,3 +86,4 @@ resource "vault_pki_secret_backend_role" "server" {
   allowed_domains  = ["example.com"]
   allow_subdomains = true
 }
+
