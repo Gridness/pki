@@ -3,3 +3,4 @@ README.md
 .version
 docs/
 docker-compose*
+.terraform*

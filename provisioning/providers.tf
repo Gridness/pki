@@ -1,11 +1,13 @@
 provider "helm" {
   kubernetes = {
-    config_path = "~/.kube/config"
+    config_path = var.kubeconfig_path
   }
 }
 
 provider "vault" {
-  address = var.vault_addr
+  address = var.vault_address
 }
 
-provider "rng" {}
+provider "kubernetes" {
+  config_path = var.kubeconfig_path
+}

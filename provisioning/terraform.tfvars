@@ -1,0 +1,5 @@
+vault_namespace        = "vault"
+istio_namespace        = "istio-system"
+cert_manager_namespace = "cert-manager"
+demo_namespace         = "demo"
+kubeconfig_path        = "~/.kube/config"

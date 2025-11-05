@@ -1,8 +1,3 @@
-variable "cluster_name" {
-  description = "Kubernetes cluster name"
-  type        = string
-}
-
 variable "vault_namespace" {
   type    = string
   default = "vault"
@@ -20,10 +15,5 @@ variable "cert_manager_namespace" {
 
 variable "demo_namepsace" {
   type    = string
-  default = "demo-services"
-}
-
-variable "issuer_email" {
-  description = "Email for Let's Encrypt issuer"
-  type        = string
+  default = "demo"
 }
