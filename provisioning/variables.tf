@@ -1,3 +1,7 @@
+variable "kubeconfig_path" {
+  type = string
+}
+
 variable "vault_namespace" {
   type    = string
   default = "vault"
@@ -16,4 +20,8 @@ variable "cert_manager_namespace" {
 variable "demo_namepsace" {
   type    = string
   default = "demo"
+}
+
+variable "vault_address" {
+  type = string
 }

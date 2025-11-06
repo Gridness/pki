@@ -1,30 +1,37 @@
-output "vault_address" {
-  description = "Vault service address"
-  value       = "http://vault.${var.namespace}.svc.cluster.local:8200"
+output "vault_pki_root_path" {
+  description = "Path to root PKI secrets engine"
+  value       = vault_mount.pki_root.path
 }
 
-output "vault_token" {
-  description = "Vault root token"
-  value       = helm_release.vault.values[0].root_token
+output "vault_pki_intermediate_path" {
+  description = "Path to intermediate PKI secrets engine"
+  value       = vault_mount.pki_intermediate.path
+}
+
+output "root_ca_certificate" {
+  description = "Root CA certificate"
+  value       = vault_pki_secret_backend_root_cert.root_ca.certificate
   sensitive   = true
 }
 
-output "namespace" {
-  description = "Vault namespace"
-  value       = var.namespace
+output "intermediate_ca_certificate" {
+  description = "Intermediate CA certificate"
+  value       = vault_pki_secret_backend_root_sign_intermediate.intermediate.certificate
+  sensitive   = true
 }
 
-output "pki_intermediate_path" {
-  description = "Path to intermediate PKI for cert-manager"
-  value       = "pki_int"
+output "ca_certificate_chain" {
+  description = "Full CA certificate chain"
+  value       = "${vault_pki_secret_backend_root_sign_intermediate.intermediate.certificate}\n${vault_pki_secret_backend_root_cert.root_ca.certificate}"
+  sensitive   = true
 }
 
 output "kubernetes_auth_path" {
   description = "Path to Kubernetes auth method"
-  value       = "kubernetes"
+  value       = vault_auth_backend.kubernetes.path
 }
 
 output "cert_manager_role_name" {
   description = "Vault role name for cert-manager"
-  value       = "cert-manager"
+  value       = vault_pki_secret_backend_role.cert_manager_role.name
 }
