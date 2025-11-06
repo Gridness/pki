@@ -35,3 +35,8 @@ output "cert_manager_role_name" {
   description = "Vault role name for cert-manager"
   value       = vault_pki_secret_backend_role.cert_manager_role.name
 }
+
+output "vault_ready" {
+  description = "Vault deployment is ready"
+  value       = helm_release.vault.status
+}
